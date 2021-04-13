@@ -28,7 +28,7 @@ public class Main {
     public static void main( String[] args ) throws IOException
     {
     	
-        if( args.length != 1 )
+        if( args.length != 6 )
         {
             usage();
         }
@@ -37,7 +37,15 @@ public class Main {
             PDDocument document = null;
             try
             {
-                document = PDDocument.load( new File(args[0]) );
+            	String signaturePng = args[0];
+            	String textToReplace = args[1];
+            	String inputPdf = args[2];
+            	String outputPdf = args[3];
+            	float offsetX = Float.parseFloat(args[4]);
+            	float offsetY = Float.parseFloat(args[5]);
+            	
+            	
+                document = PDDocument.load( new File(inputPdf) );
                 HashMap<Integer, ArrayList<Point2D.Float>> signPositionMap = 
                 		new HashMap<Integer, ArrayList<Point2D.Float>>();
                 
@@ -47,7 +55,7 @@ public class Main {
 	                stripper.setStartPage(pageNum);
 	                stripper.setEndPage(pageNum);
 	                
-	                stripper.setSearchText("[/SIGN/]");
+	                stripper.setSearchText(textToReplace);
 	
 	                Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
 	                stripper.writeText(document, dummy);
@@ -85,7 +93,7 @@ public class Main {
                 
                 //Creating PDImageXObject object
 	            PDImageXObject pdImage = PDImageXObject.createFromFile(
-	            		"C:/Users/Ian/Documents/E-Sign Test/Signature2.png", document);
+	            		signaturePng, document);
                 
 	            for (int i : signPositionMap.keySet())
 	            {
@@ -102,7 +110,7 @@ public class Main {
 		            for(Point2D.Float point : signPositions) 
 		            {
 		            	//Drawing the image in the PDF document
-			            contents.drawImage(pdImage, point.x, point.y);
+			            contents.drawImage(pdImage, point.x + offsetX, point.y + offsetY);
 			
 			            System.out.println("Image inserted");
 		            }
@@ -112,7 +120,7 @@ public class Main {
 	            }
 	      		
 	            //Saving the document
-	            document.save("C:/Users/Ian/Documents/E-Sign Test/output.pdf");
+	            document.save(outputPdf);
             }
             finally
             {
@@ -129,7 +137,7 @@ public class Main {
      */
     private static void usage()
     {
-        System.err.println( "Usage: java " + PrintTextLocations.class.getName() + " <input-pdf>" );
+        System.err.println( "Usage: java -jar pdfapp-0.0.1-SNAPSHOT.jar <signature-png> <text-to-replace> <input-pdf> <output-pdf> <x-offset> <y-offset>" );
     }
     
     
